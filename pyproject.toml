@@ -15,6 +15,7 @@ optional = true
 
 [tool.poetry.group.dev.dependencies]
 fastapi-cli = "^0.0.5"
+redis = "^5.1.1"
 
 
 

@@ -14,12 +14,15 @@ class FastAPIActuator:
             endpoint.add_to_actuator(self._actuator_api)
 
     @classmethod
-    def from_config(cls) -> Self:
+    def from_config(cls, readiness_checks: list | None = None, liveness_checks: list | None = None) -> Self:
         # TODO probable do the settings and shit here
         return FastAPIActuator(
             endpoints=[
                 InfoEndpoint(),
-                HealthcheckEndpoint(),
+                HealthcheckEndpoint(
+                    readiness_checks=[] if readiness_checks is None else readiness_checks,
+                    liveness_checks=[] if liveness_checks is None else liveness_checks
+                ),
             ]
         )
 
@@ -30,5 +33,3 @@ class FastAPIActuator:
             app: The main FastAPI application to mount the actuator to.
         """
         app.mount("/actuator", self._actuator_api)
-
-

@@ -9,30 +9,32 @@ from fastapi_actuator.endpoints.healthchecks.healthcheck import Healthcheck, Hea
 
 class HealthcheckEndpoint(Endpoint):
     def __init__(self,
-                 readiness_checks: list[Healthcheck],
-                 liveness_checks: list[Healthcheck]
+                 readiness_checks: list[Healthcheck] | None,
+                 liveness_checks: list[Healthcheck] | None
                  ) -> None:
         self._readiness_checks = readiness_checks
         self._liveness_checks = liveness_checks
 
     def add_to_actuator(self, actuator_app: FastAPI) -> None:
-        @actuator_app.get(
-            "/health/readiness",
-            tags=["Health"],
-            response_model_exclude_unset=True
-        )
-        async def evaluate_readiness() -> HealthcheckResponse:
-            statuses = await self._evaluate_readiness()
-            return self._generate_response(statuses)
+        if self._readiness_checks is not None:
+            @actuator_app.get(
+                "/health/readiness",
+                tags=["Health"],
+                response_model_exclude_unset=True
+            )
+            async def evaluate_readiness() -> HealthcheckResponse:
+                statuses = await self._evaluate_readiness()
+                return self._generate_response(statuses)
 
-        @actuator_app.get(
-            "/health/liveness",
-            tags=["Health"],
-            response_model_exclude_unset=True
-        )
-        async def evaluate_liveness() -> HealthcheckResponse:
-            statuses = await self._evaluate_liveness()
-            return self._generate_response(statuses)
+        if self._liveness_checks is not None:
+            @actuator_app.get(
+                "/health/liveness",
+                tags=["Health"],
+                response_model_exclude_unset=True
+            )
+            async def evaluate_liveness() -> HealthcheckResponse:
+                statuses = await self._evaluate_liveness()
+                return self._generate_response(statuses)
 
     async def _evaluate_readiness(self):
         return {check.get_name(): await check.get_status() for check in self._readiness_checks}

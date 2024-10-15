@@ -1,5 +1,5 @@
 from enum import StrEnum
-from typing import Protocol, Self
+from typing import Protocol, Self, runtime_checkable
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -18,6 +18,7 @@ class HealthcheckResponse(BaseModel):
     components: dict[str, Self] = Field(default_factory=dict)
 
 
+@runtime_checkable
 class Healthcheck(Protocol):
     def get_name(self) -> str:
         raise NotImplementedError()
